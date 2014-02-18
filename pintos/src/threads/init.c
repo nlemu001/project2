@@ -282,10 +282,12 @@ static void
 run_task (char **argv)
 {
   const char *task = argv[1];
+  int i;
   
   printf ("Executing '%s':\n", task);
 #ifdef USERPROG
-  process_wait (process_execute (task));
+  i = process_wait (process_execute (task));
+  //printf("process_wait closed with %d\n", i);
 #else
   run_test (task);
 #endif
