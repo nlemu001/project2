@@ -480,7 +480,6 @@ parse_args(void **esp, const char* file_name, char ** save_ptr)
     memcpy(*esp, &argv[argc], i);
   }
   
-  
   // Reverse order of arguments so the command gets popped first
   for (i = argc; i >= 0; i--)
   {
