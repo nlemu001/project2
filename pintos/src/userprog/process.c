@@ -439,41 +439,32 @@ load_segment (struct file *file, off_t ofs, uint8_t *upage,
 static bool
 parse_args(void **esp, const char* file_name, char ** save_ptr)
 {
-  int argv_len = 2;
+int argv_len = 2;
   char **argv = malloc(argv_len*sizeof(char *));
-  if (!argv)
-      return false;
+  if (argv == NULL) return false;
   
   int argc = 0;
-  char *arg;
+  char *token;
   // Push args onto stack
-  for (arg = (char *) file_name; arg != NULL;
-	   arg = strtok_r (NULL, " ", save_ptr))
+  for (token = (char *) file_name; token != NULL;
+	   token = strtok_r (NULL, " ", save_ptr))
   {
-	*esp -= strlen(arg) + 1;
-    argv[argc] = *esp;
-    argc++;
+	*esp -= strlen(token) + 1;
+    argv[argc++] = *esp;
+
     // Resize argv
     if (argc >= argv_len)
 	{
 	  argv_len *= 2;
 	  argv = realloc(argv, argv_len*sizeof(char *));
-	  if (!argv)
-	    return false;
+	  if (argv == NULL) return false;
 	}
-    memcpy(*esp, arg, strlen(arg) + 1);
+    memcpy(*esp, token, strlen(token) + 1);
   }
-  
-  /*// Print arguments in argv (used to debug)  
-  int k;
-  for(k = 0; k < argc; k++)
-  {
-	printf("%s\n", argv[k]);  
-  }*/
-  
+
   argv[argc] = 0;
   // Align to word size (4 bytes)
-  int i = (int)*esp % 4;
+  int i = (size_t)*esp % 4;
   if (i != 0)
   {
     *esp -= i;
@@ -487,20 +478,12 @@ parse_args(void **esp, const char* file_name, char ** save_ptr)
     memcpy(*esp, &argv[i], sizeof(char *));
   }
   
-  /*
-  // Print arguments in argv (used to debug)  
-  int j;
-  for(j = 0; j < argc; j++)
-  {
-	printf("%s\n", argv[j]);  
-  }
-  */
   // Push start of argv, argc and 
   // argv-terminating char onto the stack
-  arg = *esp;
+  token = *esp;
   *esp -= sizeof(char **);
-  memcpy(*esp, &arg, sizeof(char **));
-  
+  memcpy(*esp, &token, sizeof(char **));
+
   *esp -= sizeof(int);
   memcpy(*esp, &argc, sizeof(int));
 
